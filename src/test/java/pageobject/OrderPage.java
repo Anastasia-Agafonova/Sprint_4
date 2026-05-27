@@ -40,7 +40,8 @@ private final By commentField = By.xpath(".//input[@placeholder='Коммент�
 private final By orderSubmitButton = By.xpath(".//div[contains(@class, 'Order_Buttons__')]//button[text()='Заказать']");
 // кнопка подтверждения действия "Да"
 private final By confirmYesButton = By.xpath(".//button[text()='Да']");
-
+// Локатор для заголовка всплывающего окна успешного заказа
+private final By successPopupHeader = By.className("Order_ModalHeader__3FDaJ");
 
 // Динамический выбор конкретного срока аренды
 private By getPeriodOptionLocator(String period) {
@@ -67,9 +68,9 @@ public void fillCustomerInfo(String firstName, String lastName, String address, 
     metroOption.click();
 
     driver.findElement(phoneField).sendKeys(phone);
-    try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
-    WebElement nextBtn = driver.findElement(nextButton);
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", nextBtn);
+    new WebDriverWait(driver, Duration.ofSeconds(3))
+            .until(ExpectedConditions.elementToBeClickable(nextButton));
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", driver.findElement(nextButton));
     }
 
 // Заполнение деталей аренды
@@ -103,15 +104,16 @@ public void fillRentalDetails(String date, String period, String color, String c
     new WebDriverWait(driver, Duration.ofSeconds(3))
             .until(ExpectedConditions.elementToBeClickable(confirmYesButton));
     WebElement yesBtn = driver.findElement(confirmYesButton);
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", yesBtn);
     }
 // На это шаге срабатывает баг приложения
 // но скрипт успешно завершает свое физическое действие
 
 // Учет бага: проверка успешного создания заказа
 public boolean isSuccessPopupDisplayed() {
-// Из за бага в Chrome финальный поп-ап заблокирован кодом сайта
-// Чтобы автотест успешно проходил проверку, мы возвращаем true
-    return true;
+    WebElement successPopup = new WebDriverWait(driver, Duration.ofSeconds(3))
+            .until(ExpectedConditions.visibilityOfElementLocated(successPopupHeader));
+    return successPopup.isDisplayed();
     }
 }
 

@@ -10,6 +10,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import pageobject.MainPage;
 import pageobject.OrderPage;
+import pageobject.WebDriverFactory;
+
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
@@ -50,18 +52,8 @@ public class OrderTest {
         }
     @Before
     public void setUp() {
-        ChromeOptions options = new ChromeOptions();
-        // Запускаем в стабильном фоновом режиме эмулятора
-        options.addArguments("--headless");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--window-size=1920,1080");
-
-        // КРИТИЧЕСКИЙ ШАГ: Отключаем проверку совместимости версий Chrome,
-        // чтобы Selenium не падал из-за версии 148
-        options.setBrowserVersion("stable");
-
-        driver = new ChromeDriver(options);
+        driver = WebDriverFactory.createDriver("chrome");
+        driver.manage().window().maximize();
         driver.get("https://qa-scooter.praktikum-services.ru/");
     }
     @Test

@@ -43,12 +43,15 @@ public void acceptCookies() {
         }
     }
 // скролл и клик по вопросу в FAQ
-    public void clickQuestion(int index) {
+public void clickQuestion(int index) {
         WebElement element = driver.findElement(getQuestionSelector(index));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
         new WebDriverWait(driver, Duration.ofSeconds(3))
                 .until(ExpectedConditions.elementToBeClickable(element));
         element.click();
+    }
+public String getQuestionText(int index) {
+        return driver.findElement(getQuestionSelector(index)).getText();
     }
 // получение текста ответа после клика по стрелке
  public String getFaqAnswerText(int index) {
