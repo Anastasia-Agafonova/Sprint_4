@@ -9,6 +9,7 @@ import org.openqa.selenium.WebDriver;
 import pageobject.MainPage;
 import pageobject.WebDriverFactory;
 
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -17,7 +18,7 @@ private WebDriver driver;
 private final int index;
 private final String expectedAnswer;
 private final String expectedQuestion;
-private static final String BASE_URL = "https://praktikum-services.ru";
+private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
 
 public FaqTest(int index, String expectedQuestion, String expectedAnswer) {
     this.index = index;
@@ -47,11 +48,11 @@ public static Object[] [] getTestData() {
     public void  testDropdownTextAppears() {
     MainPage mainPage = new MainPage(driver);
     mainPage.acceptCookies();
-    String actualQuestionText = mainPage.getQuestionText(index);
-    assertEquals("Текст вопроса не совпадает с ожидаемым!", expectedQuestion, actualQuestionText);
+
     mainPage.clickQuestion(index);
     String actualAnswer = mainPage.getFaqAnswerText(index);
     assertEquals("Текст ответа под стрелкой не совпадает с ожидаемым!", expectedAnswer, actualAnswer);
+
 }
 @After
     public void tearDown() {

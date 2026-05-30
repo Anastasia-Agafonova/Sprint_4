@@ -41,7 +41,7 @@ private final By orderSubmitButton = By.xpath(".//div[contains(@class, 'Order_Bu
 // кнопка подтверждения действия "Да"
 private final By confirmYesButton = By.xpath(".//button[text()='Да']");
 // Локатор для заголовка всплывающего окна успешного заказа
-private final By successPopupHeader = By.className("Order_ModalHeader__3FDaJ");
+private final By successPopupHeader = By.xpath(".//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]");
 
 // Динамический выбор конкретного срока аренды
 private By getPeriodOptionLocator(String period) {
@@ -96,24 +96,19 @@ public void fillRentalDetails(String date, String period, String color, String c
         }
     driver.findElement(commentField).sendKeys(comment);
 
-// Клик по кнопке "Заказать" через JS-скрипт (обход перекрытий)
+// Кнопка "Заказать" — скролл + ожидание + обычный клик
     WebElement submitBtn = driver.findElement(orderSubmitButton);
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitBtn);
+    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", submitBtn);
+    new WebDriverWait(driver, Duration.ofSeconds(3))
+            .until(ExpectedConditions.elementToBeClickable(submitBtn));
+    submitBtn.click();
 
-// Ожидаем появления кнопки "Да" в модальном окне
+// Кнопка подтверждения "Да" в модальном окне
     new WebDriverWait(driver, Duration.ofSeconds(3))
             .until(ExpectedConditions.elementToBeClickable(confirmYesButton));
     WebElement yesBtn = driver.findElement(confirmYesButton);
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", yesBtn);
-    }
-// На это шаге срабатывает баг приложения
-// но скрипт успешно завершает свое физическое действие
-
-// Учет бага: проверка успешного создания заказа
-public boolean isSuccessPopupDisplayed() {
-    WebElement successPopup = new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.visibilityOfElementLocated(successPopupHeader));
-    return successPopup.isDisplayed();
+    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", yesBtn);
+    yesBtn.click(); // При баге тест упадет здесь с ElementClickInterceptedException
     }
 }
 

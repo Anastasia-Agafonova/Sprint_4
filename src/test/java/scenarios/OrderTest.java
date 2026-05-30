@@ -5,13 +5,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import pageobject.MainPage;
 import pageobject.OrderPage;
 import pageobject.WebDriverFactory;
 
+import java.time.Duration;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
@@ -73,7 +77,15 @@ public class OrderTest {
         orderPage.fillRentalDetails(date, period, color, comment);
 
 // Проверка успешного создания заказа
-        assertTrue("Окно успешного заказа не появилось!", orderPage.isSuccessPopupDisplayed());
+        try {
+            WebElement successPopup = new WebDriverWait(driver, Duration.ofSeconds(3))
+                    .until(ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath(".//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]")
+                    ));
+            assertTrue("Окно успешного заказа появилось!", successPopup.isDisplayed());
+        } catch (TimeoutException e) {
+            org.junit.Assert.fail("БАГ: Окно успешного заказа не появилось! Кнопка 'Да' возможно не сработала.");
+        }
     }
     @After
     public void tearDown () {
