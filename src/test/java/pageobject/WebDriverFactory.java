@@ -8,27 +8,29 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 
 
 public class WebDriverFactory {
-    private static final boolean HEADLESS_MODE = false;
-    public static WebDriver createDriver(String browserName) {
-    switch (browserName.toLowerCase()) {
-    case "chrome":
-    ChromeOptions options = new ChromeOptions();
-    options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
-        if (HEADLESS_MODE) {
-            options.addArguments("--headless=new");
-        }
-    return new ChromeDriver(options);
 
-    case "firefox":
-    FirefoxOptions ffOptions = new FirefoxOptions();
-        if (HEADLESS_MODE) {
-            ffOptions.addArguments("--headless");
-        }
-            return new FirefoxDriver(ffOptions);
+    private static final boolean HEADLESS_MODE = false;
+
+    public static WebDriver createDriver(String browserName) {
+        switch (browserName.toLowerCase()) {
+            case "chrome":
+                ChromeOptions chromeOptions = new ChromeOptions();
+                chromeOptions.addArguments("--no-sandbox", "--disable-dev-shm-usage");
+                if (HEADLESS_MODE) {
+                    chromeOptions.addArguments("--headless=new");
+                }
+                return new ChromeDriver(chromeOptions);
+
+            case "firefox":
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+                if (HEADLESS_MODE) {
+                    firefoxOptions.addArguments("--headless");
+                }
+                return new FirefoxDriver(firefoxOptions);
 
             default:
-                throw new IllegalArgumentException("Браузер '" + browserName + "' не поддерживается. Используйте 'chrome' или 'firefox'.");
+               throw new IllegalArgumentException("Браузер '" + browserName + "' не поддерживается. Используйте 'chrome' или 'firefox'.");
         }
     }
-    }
+}
 

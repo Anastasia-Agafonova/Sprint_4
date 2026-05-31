@@ -5,23 +5,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pageobject.MainPage;
 import pageobject.OrderPage;
 import pageobject.WebDriverFactory;
 
-import java.time.Duration;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class OrderTest {
-    private WebDriver driver;
 
+    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
+
+    private WebDriver driver;
     private final String buttonLocation; // bottom или top
     private final String firstName;
     private final String lastName;
@@ -46,20 +42,22 @@ public class OrderTest {
         this.color = color;
         this.comment = comment;
     }
-// Параметризация: 2 разных набора данных, запускающих точки входа (верхняя и нижняя кнопки)
-   @Parameterized.Parameters
+    // Параметризация: 2 разных набора данных, запускающих точки входа (верхняя и нижняя кнопки)
+    @Parameterized.Parameters
     public static Object[][] getOrderData() {
-         return new Object[][]{
+        return new Object[][]{
             {"top", "Арсений", "Соколов", "Москва, Чистопрудный бульвар, д. 1А", "Чистые пруды", "+79991212121", "20.05.2026", "сутки", "серый", "Позвонить за пол часа"},
             {"bottom", "Анастасия", "Агафонова", "Москва, ул. Мясницкая, д. 3", "Лубянка", "89991122334", "22.05.2026", "двое суток", "черный", ""}
-            };
-        }
+        };
+    }
+
     @Before
     public void setUp() {
         driver = WebDriverFactory.createDriver("chrome");
         driver.manage().window().maximize();
-        driver.get("https://qa-scooter.praktikum-services.ru/");
+        driver.get(BASE_URL);
     }
+
     @Test
     public void testOrderScooterFlow () {
         MainPage mainPage = new MainPage(driver);
@@ -72,25 +70,20 @@ public class OrderTest {
         } else {
             mainPage.clickBottomOrderButton();
         }
-// Выполнение последовательных шагов заказа
+
+        // Выполнение последовательных шагов заказа
         orderPage.fillCustomerInfo(firstName, lastName, address, metro, phone);
         orderPage.fillRentalDetails(date, period, color, comment);
 
-// Проверка успешного создания заказа
-        try {
-            WebElement successPopup = new WebDriverWait(driver, Duration.ofSeconds(3))
-                    .until(ExpectedConditions.visibilityOfElementLocated(
-                            By.xpath(".//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]")
-                    ));
-            assertTrue("Окно успешного заказа появилось!", successPopup.isDisplayed());
-        } catch (TimeoutException e) {
-            org.junit.Assert.fail("БАГ: Окно успешного заказа не появилось! Кнопка 'Да' возможно не сработала.");
-        }
+        // Проверка успешного создания заказа
+        assertTrue("БАГ: Окно успешного заказа не появилось! Кнопка 'Да' возможно не сработала.",
+                orderPage.isSuccessPopupDisplayed());
     }
+
     @After
-    public void tearDown () {
+    public void tearDown(){
         if (driver != null) {
-            driver.quit();
+           driver.quit();
         }
     }
 }

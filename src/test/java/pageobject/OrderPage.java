@@ -3,112 +3,108 @@ package pageobject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import java.time.Duration;
 
 public class OrderPage {
-private final WebDriver driver;
 
-// локаторы: Шаг 1 "Для кого самокат"
-// Поле ввода "Имя"
-private final By firstNameField = By.xpath(".//input[@placeholder='* Имя']");
-// Поле ввода "Фамилия"
-private final By lastNameField = By.xpath(".//input[@placeholder='* Фамилия']");
-// Поле ввода "Адрес"
-private final By addressField = By.xpath(".//input[@placeholder='* Адрес: куда привезти заказ']");
-// Поле ввода "Станция метро"
-private final By metroStationField = By.xpath(".//input[@placeholder='* Станция метро']");
-// Строка из выпадающего списка метро
-private final By metroSelectOption = By.className("select-search__row"); // Выбор первого совпадения
-// Поле ввода "Телефон"
-private final By phoneField = By.xpath(".//input[@placeholder='* Телефон: на него позвонит курьер']");
-// Кнопка перехода к следующему шагу "Далее"
-private final By nextButton = By.xpath(".//button[text()='Далее']");
+    private final WebDriver driver;
+    private final WebDriverWait wait;
 
-// локаторы: Шаг 2 "Про аренду"
-// Поле ввода даты Когда привезти самокат
-private final By dateField = By.xpath(".//input[@placeholder='* Когда привезти самокат']");
-// Выпадающий список Срок аренды
-private final By rentalPeriodDropdown = By.className("Dropdown-placeholder");
-// Чекбокс выбора черного цвета
-private final By blackColorCheckbox = By.id("black");
-// Чекбокс выбора черного цвета
-private final By greyColorCheckbox = By.id("grey");
-// Поле ввода Комментарий для курьера
-private final By commentField = By.xpath(".//input[@placeholder='Комментарий для курьера']");
-// кнопка отправки формы
-private final By orderSubmitButton = By.xpath(".//div[contains(@class, 'Order_Buttons__')]//button[text()='Заказать']");
-// кнопка подтверждения действия "Да"
-private final By confirmYesButton = By.xpath(".//button[text()='Да']");
-// Локатор для заголовка всплывающего окна успешного заказа
-private final By successPopupHeader = By.xpath(".//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]");
+    // Локаторы: Шаг 1 "Для кого самокат"
+    private final By firstNameField = By.xpath(".//input[@placeholder='* Имя']");
+    private final By lastNameField = By.xpath(".//input[@placeholder='* Фамилия']");
+    private final By addressField = By.xpath(".//input[@placeholder='* Адрес: куда привезти заказ']");
+    private final By metroStationField = By.xpath(".//input[@placeholder='* Станция метро']");
+    private final By metroSelectOption = By.className("select-search__row"); // Выбор первого совпадения
+    private final By phoneField = By.xpath(".//input[@placeholder='* Телефон: на него позвонит курьер']");
+    private final By nextButton = By.xpath(".//button[text()='Далее']");
 
-// Динамический выбор конкретного срока аренды
-private By getPeriodOptionLocator(String period) {
-    return By.xpath(".//div[@class='Dropdown-option' and text()='" + period + "']");
-}
+    // Локаторы: Шаг 2 "Про аренду"
+    private final By dateField = By.xpath(".//input[@placeholder='* Когда привезти самокат']");
+    private final By rentalPeriodDropdown = By.className("Dropdown-placeholder");
+    private final By blackColorCheckbox = By.id("black");
+    private final By greyColorCheckbox = By.id("grey");
+    private final By commentField = By.xpath(".//input[@placeholder='Комментарий для курьера']");
+    private final By orderSubmitButton = By.xpath(".//div[contains(@class, 'Order_Buttons__')]//button[text()='Заказать']");
+    private final By confirmYesButton = By.xpath(".//button[text()='Да']");
+    private final By successPopupHeader = By.xpath(".//div[contains(@class, 'Order_ModalHeader__3FDaJ') and contains(text(), 'Заказ оформлен')]");
 
-public OrderPage(WebDriver driver) {
-   this.driver = driver;
+    // Конструктор
+    public OrderPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(3));
     }
 
-// Заполнение данных клиента
-public void fillCustomerInfo(String firstName, String lastName, String address, String metro, String phone) {
-   driver.findElement(firstNameField).sendKeys(firstName);
-   driver.findElement(lastNameField).sendKeys(lastName);
-   driver.findElement(addressField).sendKeys(address);
-
-    WebElement metroInput = driver.findElement(metroStationField);
-    metroInput.click();
-    metroInput.sendKeys(metro);
-    new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.visibilityOfElementLocated(metroSelectOption));
-    WebElement metroOption = driver.findElement(metroSelectOption);
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", metroOption);
-    metroOption.click();
-
-    driver.findElement(phoneField).sendKeys(phone);
-    new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.elementToBeClickable(nextButton));
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", driver.findElement(nextButton));
+    // Вспомогательный метод для выбора срока аренды
+    private By getPeriodOptionLocator(String period) {
+        return By.xpath(".//div[@class='Dropdown-option' and text()='" + period + "']");
     }
 
-// Заполнение деталей аренды
-public void fillRentalDetails(String date, String period, String color, String comment) {
-    new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.visibilityOfElementLocated(dateField));
+    // Вспомогательные методы (Утилиты для UI)
+    private void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
+    }
 
-    driver.findElement(dateField).sendKeys(date);
-    driver.findElement(dateField).sendKeys(Keys.ENTER);
-// Закрываем календарь кликом по фону страницы
-    driver.findElement(By.tagName("body")).click();
+    private void clickViaJs(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+    }
 
-    driver.findElement(rentalPeriodDropdown).click();
-    By periodLocator = getPeriodOptionLocator(period);
-    new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.elementToBeClickable(periodLocator));
-    driver.findElement(periodLocator).click();
-
+    private void selectScooterColor(String color) {
         if ("черный".equalsIgnoreCase(color)) {
             driver.findElement(blackColorCheckbox).click();
         } else if ("серый".equalsIgnoreCase(color)) {
             driver.findElement(greyColorCheckbox).click();
         }
-    driver.findElement(commentField).sendKeys(comment);
+    }
 
-// Кнопка "Заказать" — скролл + ожидание + обычный клик
-    WebElement submitBtn = driver.findElement(orderSubmitButton);
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", submitBtn);
-    new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.elementToBeClickable(submitBtn));
-    submitBtn.click();
+    // Заполнение данных клиента (ФИО, адрес, метро, телефон)
+    public void fillCustomerInfo(String firstName, String lastName, String address, String metro, String phone) {
+        driver.findElement(firstNameField).sendKeys(firstName);
+        driver.findElement(lastNameField).sendKeys(lastName);
+        driver.findElement(addressField).sendKeys(address);
 
-// Кнопка подтверждения "Да" в модальном окне
-    new WebDriverWait(driver, Duration.ofSeconds(3))
-            .until(ExpectedConditions.elementToBeClickable(confirmYesButton));
-    WebElement yesBtn = driver.findElement(confirmYesButton);
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", yesBtn);
-    yesBtn.click(); // При баге тест упадет здесь с ElementClickInterceptedException
+        WebElement metroInput = driver.findElement(metroStationField);
+        metroInput.click();
+        metroInput.sendKeys(metro);
+
+        WebElement metroOption = wait.until(ExpectedConditions.visibilityOfElementLocated(metroSelectOption));
+        scrollToElement(metroOption);
+        metroOption.click();
+
+        driver.findElement(phoneField).sendKeys(phone);
+        WebElement nextBtn = wait.until(ExpectedConditions.elementToBeClickable(nextButton));
+        clickViaJs(nextBtn);
+    }
+
+    // Заполнение деталей аренды (дата, срок, цвет, комментарий)
+    public void fillRentalDetails(String date, String period, String color, String comment) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(dateField));
+        driver.findElement(dateField).sendKeys(date);
+        driver.findElement(dateField).sendKeys(Keys.ENTER);
+        driver.findElement(By.tagName("body")).click();
+
+        driver.findElement(rentalPeriodDropdown).click();
+        By periodLocator = getPeriodOptionLocator(period);
+        wait.until(ExpectedConditions.elementToBeClickable(periodLocator)).click();
+
+        selectScooterColor(color);
+        driver.findElement(commentField).sendKeys(comment);
+
+        WebElement submitBtn = driver.findElement(orderSubmitButton);
+        scrollToElement(submitBtn);
+        wait.until(ExpectedConditions.elementToBeClickable(submitBtn)).click();
+
+        WebElement yesBtn = wait.until(ExpectedConditions.elementToBeClickable(confirmYesButton));
+        scrollToElement(yesBtn);
+        yesBtn.click(); // При баге кнопка не нажмется - тест упадет здесь
+    }
+
+    public boolean isSuccessPopupDisplayed() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(successPopupHeader)).isDisplayed();
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 }
 
